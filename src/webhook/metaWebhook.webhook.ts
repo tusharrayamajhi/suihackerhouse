@@ -10,6 +10,11 @@ import { MessageServices } from 'src/services/message.services';
 import {  Message, MessagingEvent, WebhookEvent } from 'src/utils/meta';
 import { Response ,Request} from 'express';
 import { Repository } from 'typeorm';
+import { BusinessDetails } from 'src/entities/business.entities';
+import { ProductAgent } from 'src/agent/product.agent';
+import { Product } from 'src/entities/Product.entities';
+import { SuperAgent } from 'src/agent/superAgent';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 @Controller()
 export class WebhookController {
 
@@ -17,11 +22,16 @@ export class WebhookController {
     constructor(
         private readonly config:ConfigService,
         @InjectRepository(Customer) private readonly customerRepo: Repository<Customer>,
+        @InjectRepository(BusinessDetails) private readonly businessRepo:Repository<BusinessDetails>,
+        @InjectRepository(Product) private readonly productRepo:Repository<Product>,
         private readonly CustomerService:customerService,
         private readonly MessageEvent:MessageEventListener,
         private readonly messageServices:MessageServices,
         private readonly messageAgent:MessageAgent,
-        private readonly intentAgent:IntentAgent
+        private readonly superAgent:SuperAgent,
+        private readonly productAgent:ProductAgent,
+        private readonly intentAgent:IntentAgent,
+        private readonly eventEmitter:EventEmitter2
     ){}
 
     @Get("/webhook")
@@ -54,6 +64,7 @@ export class WebhookController {
     async postWebhook(@Req() req: Request, @Res() res: Response, @Body() body: WebhookEvent) {
         if (body.object === "page") {
             for (const entry of body.entry) {
+                // console.log(body)
 
                 const webhookEvent:MessagingEvent = entry.messaging[0];
                 const senderPsid = webhookEvent.sender.id;
@@ -61,6 +72,7 @@ export class WebhookController {
                 const customer = await this.customerRepo.findOneBy({ CustomerId: senderPsid })
                 if (!customer) {
                     try {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         const customer = await this.CustomerService.GetUserData(senderPsid)
                         if (customer) {
                            await this.CustomerService.SaveCustomer(customer)
@@ -76,21 +88,56 @@ export class WebhookController {
                     try {
 
                         console.log(webhookEvent.message)
-                        await this.MessageEvent.handelMessage({payload:webhookEvent.message,senderId:senderPsid});
                         // await this.llmEvent.handelMessage(senderPsid);
-                        const message:Message = webhookEvent.message;
-                        const [histroy,intent] = await Promise.all([
+                        const customerMessage:Message = webhookEvent.message;
+                        const [history,intent,customerDetails] = await Promise.all([
                             await this.messageServices.getHistoryMessage({senderId:senderPsid}),
-                            await this.intentAgent.calculateIntent({message:message.text})
+                            await this.intentAgent.calculateIntent({message:customerMessage.text}),
+                            await this.customerRepo.findOneBy({CustomerId:senderPsid}),
+                            // await this.productRepo.find()
+                            // await this.businessRepo.fin
                         ])
+                        await this.MessageEvent.handelMessage({payload:webhookEvent.message,senderId:senderPsid});
+                        const business = {
+                            name:"P&P Clothing ",
+                            description:"we sales a cloth in nepal since 10 years we mainly sales cloth for both mens and women",
+                            category:"clothing",
+                            website:"www.ppclothing.com.np",
+                            contactEmail:"tusharrayamajhi6@gmail.com",
+                            contactPhone:"9745440380",
+                            address:"shitalnagar 7 devdaha rupandehi",
+                            payment:"we recived a payment in nepali currency",
+                        }
+                        const superAgentResponse:any = await this.superAgent.superAgent({confidence:intent?.confidence,tone:intent?.tone,history:history,customer:customerDetails,business:business,message:webhookEvent.message.text,time:new Date()})
+                        console.log(superAgentResponse)
 
-                        console.log("history message")
-                        console.log(histroy)
-                        console.log("intent")
-                        console.log(intent)
-                        // const [res1, res2, res3] = await Promise.all([
-                        //     await this.messageAgent.Message()
+                        for(const agent of superAgentResponse){
+                            // console.log(agent.agent)
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+                            this.eventEmitter.emit(agent.agent, {
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                                customerMessage: agent.customerMessage,
+                                senderId: senderPsid,
+                                history: history,
+                                customerDetails: customerDetails,
+                                businessDetails: business,
+                                tone:intent?.tone,
+                                confidence:intent?.confidence,
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                                messageToAgent:agent.messageToAgent,
+                                time:new Date()
+                            });
+                            console.log("loop")
+                        }
+
+
+
+                        // const [message,product] = await Promise.all([
+                        //     await this.messageAgent.Message({message:customerMessage.text,customer:cus, history:histroy,senderId:senderPsid,time:new Date(),business:business,tone:intent?.tone,confidence:intent?.confidence}),
+                        //     await this.productAgent.Product({business:business,customer:cus,history:histroy,message:customerMessage?.text,product:products,time:new Date(),confident:intent?.confidence,tone:intent?.tone})
                         // ]);
+                        // console.log(message)
+                        // console.log(product)
 
                         // this.eventEmitter.emit('message', { payload: webhookEvent.message, senderId: senderPsid });
 

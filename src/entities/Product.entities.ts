@@ -1,7 +1,5 @@
-import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity } from "typeorm";
 import { BaseEntities } from "./BaseEntities.entities";
-import { Category } from "./category.entities";
-import { ProductVariant } from "./productVeriant.entities";
 
 export enum Size {
   XS = 'XS',
@@ -21,7 +19,7 @@ export class Product extends BaseEntities {
   @Column({ type: "text", nullable: false })
   description: string;
 
-  @Column({ type: "varchar", unsigned: false, nullable: false,default:'0' })
+  @Column({ type: "varchar", nullable: false,default:'0' })
   price: string;
 
   @Column({ type: "int", unsigned: true, nullable: false })
@@ -33,9 +31,9 @@ export class Product extends BaseEntities {
   @Column({ type: "varchar", length: 255, nullable: true })  
   videoLink: string;
 
-  @OneToMany(() => ProductVariant, (variant) => variant.product)
-  variants: ProductVariant[];
+  @Column({type: "simple-array"})
+  size: Size[];
 
-  @ManyToOne(() => Category, (category) => category.products) // Defining the relation
-  category: Category;
+  @Column()
+  color:string;
 }

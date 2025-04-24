@@ -53,7 +53,7 @@ export class MessageServices{
         
         
         if (allMessages.length === 0) {
-            return JSON.stringify({ message: "no history message it is first conversion of customer" });
+            return JSON.stringify({ message: [] });
         }
         
         // Convert to LangChain messages

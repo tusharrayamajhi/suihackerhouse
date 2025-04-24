@@ -11,8 +11,6 @@ import { Product } from './entities/Product.entities';
 import { Shipping } from './entities/Shipping.entities';
 import { Attachments } from './entities/attachment.entities';
 import { Payload } from './entities/payload.entities';
-import { ProductVariant } from './entities/productVeriant.entities';
-import { Category } from './entities/category.entities';
 import { customerService } from './services/customer.services';
 import { WebhookController } from './webhook/metaWebhook.webhook';
 import { ModelService } from './services/model.services';
@@ -23,10 +21,24 @@ import { OutputParser } from './services/outputparser.services';
 import { MessageAgent } from './agent/message.agent';
 import { IntentAgent } from './agent/intent.agent';
 import { BusinessDetails } from './entities/business.entities';
+import { ProductAgent } from './agent/product.agent';
+import { SuperAgent } from './agent/superAgent';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ResponseClass } from './utils/response';
+import { OrderAgent } from './agent/order.agent';
+import { AskAgent } from './agent/ask.agent';
+import { PaymentService } from './services/payment.services';
+import { WalrusService } from './services/walarus.services';
+import { SuiController } from './controller/sui.controllers';
+import { OrderController } from './controller/order.controllers';
+import { MailService } from './services/mail.services';
+import { SendEmailListener } from './event/mail.event';
+import { WalrusEvent } from './event/walurs.event';
 
 @Module({
   imports: [
     ConfigModule.forRoot({isGlobal:true}),
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forRootAsync({
       useFactory:(configService:ConfigService)=>({
         type:"mysql",
@@ -46,8 +58,6 @@ import { BusinessDetails } from './entities/business.entities';
           Shipping,
           Attachments,
           Payload,
-          ProductVariant,
-          Category,
           BusinessDetails
 
         ],
@@ -66,13 +76,16 @@ import { BusinessDetails } from './entities/business.entities';
       Shipping,
       Attachments,
       Payload,
-      ProductVariant,
-      Category,
       BusinessDetails
       ])
   ],
-  controllers: [WebhookController],
+  controllers: [
+    WebhookController,
+    SuiController,
+    OrderController,
+  ],
   providers: [
+    SendEmailListener,
     customerService,
     ModelService,
     PromptServices,
@@ -80,7 +93,17 @@ import { BusinessDetails } from './entities/business.entities';
     MessageServices,
     MessageAgent,
     OutputParser,
-    IntentAgent
+    IntentAgent,
+    ProductAgent,
+    SuperAgent,
+    OrderAgent,
+    ResponseClass,
+    AskAgent,
+    PaymentService,
+    WalrusService,
+    WalrusEvent,
+    MailService
+
   ],
 })
 export class AppModule {}

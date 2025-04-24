@@ -19,7 +19,7 @@ export class ModelService{
         this.model = new ChatGoogleGenerativeAI({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             apiKey:apiKey,
-            temperature:0.2,
+            temperature:0.5,
             model:"gemini-1.5-flash",
         });
     }

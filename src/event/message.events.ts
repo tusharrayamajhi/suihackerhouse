@@ -66,7 +66,7 @@ export class MessageEventListener{
                 customer: customer,
                 CustomerMessage:text,
                 // attachments:attachmentsData,
-                // processed:false,
+                processed:true,
                 // reply_to:replyTo
             })
             await this.customerMessageRepo.save(message);
