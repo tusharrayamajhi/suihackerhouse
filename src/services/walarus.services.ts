@@ -16,7 +16,7 @@ export class WalrusService {
 
     }
 
-    async uploadOrder(order: Orders, epochs = 5) {
+    async uploadOrder(order: any, epochs = 5) {
         const json = JSON.stringify(order, null, 2);
         const blob = new Blob([json],{"type":"application/json"})
         // const buffer = Buffer.from(json);

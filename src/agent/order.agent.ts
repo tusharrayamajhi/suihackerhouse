@@ -58,7 +58,7 @@ export class OrderAgent{
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 // customer:data.customerDetails,
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                // business:data.businessDetails,
+                business:data.businessDetails,
                 // message:data.customerMessage,
                 // time:data.time,
                 product:products,
@@ -99,13 +99,13 @@ export class OrderAgent{
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const order = this.OrderRepo.create({orderItem:orderItem,customer:customer,status:'pending',total_amount:total})
                 const result = await this.OrderRepo.save(order)
-                await this.responseService.sendTextResponseToCustomer({senderId:data.senderId,textMessage:"successfully saved order"})
+                await this.responseService.sendTextResponseToCustomer({senderId:data.senderId,textMessage:"thank you for purchasing from us"})
                 // eslint-disable-next-line no-loss-of-precision
                 // await this.responseService.sendTextResponseToCustomer({senderId:data.senderId,textMessage:`https://sui-hackethon1.onrender.com/?wallet=0xd8f629993378cfb6186ae030b9e405c8681177a74635d227a7b8ab7e073e7a19&amount=${3}&order_id=${result.id}`})
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 // const esewaLink:any = await this.paymentService.getEsewaPaymentLink({orderId:result.id,senderId:data.senderId,total:total})
                 // console.log(esewaLink)
-                const suipaymentLink:any = `https://sui-hackethon1.onrender.com/?wallet=0xd8f629993378cfb6186ae030b9e405c8681177a74635d227a7b8ab7e073e7a19&amount=${3}&order_id=${result.id}`
+                const suipaymentLink:any = `https://sui-hackethon1.onrender.com/?wallet=0x9e0e9b9d31321339813986e12e8e408f80ed4aa838fca8cf0365c3f00ca5eb1c&amount=${3}&order_id=${result.id}`
                 // const suipaymentLink:any = `https://wallet.sui.io/open?dapp=https://sui-hackethon1.onrender.com/?wallet=0xd8f629993378cfb6186ae030b9e405c8681177a74635d227a7b8ab7e073e7a19&amount=${3}&order_id=${result.id}`
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 await this.responseService.sendPaymentLink({senderId:data.senderId,suilink:suipaymentLink})

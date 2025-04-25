@@ -22,7 +22,7 @@ export class IntentAgent{
             const Prompt:ChatPromptTemplate = this.promptServices.getIntentCalculationPrompt();
             const outputParser = this.outputParserServices.getIntentOutputParser();
             const agent = Prompt.pipe(this.model).pipe(outputParser) 
-            const response = await agent.invoke({message:data.message})
+            const response = await agent.invoke({message:data,format_instruction:outputParser.getFormatInstructions()})
             return response
         }catch(err){
             console.log("something went wrong in intent calculation")

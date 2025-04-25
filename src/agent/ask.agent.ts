@@ -27,7 +27,7 @@ export class AskAgent {
         @InjectRepository(Product) private readonly productRepo: Repository<Product>
     ) {
         this.model = this.modelService.getModel()
-        this.prompt = this.promptService.askQuestiomToCustomer()
+        this.prompt = this.promptService.askQuestionToCustomer()
         this.outputParser = this.outputService.getQuestionToCustomerOutputParser()
     }
     @OnEvent("AskAgent")

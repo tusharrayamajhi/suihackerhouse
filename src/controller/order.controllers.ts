@@ -2,6 +2,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Orders } from "src/entities/Order.entities";
 import { Equal, Repository } from "typeorm";
 import { Controller, Get, Param } from '@nestjs/common';
+import { getCustomerData } from "src/services/sui.services";
 
 @Controller()
 export class OrderController{
@@ -26,5 +27,11 @@ export class OrderController{
             console.log(err)
             return {messgae:"something went wrong"}
         }
+    }
+
+    @Get('abc')
+    async getCus(){
+      const data =  await getCustomerData("")
+      console.log(data)
     }
 }

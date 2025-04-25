@@ -58,6 +58,7 @@ export class ProductAgent{
                 history:[data.history],
                 tone:data.tone,
                 confidence:data.confidence,
+                // messageToAgent:data.messageToAgent,
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
                 formatInstructions:this.outputParser.getFormatInstructions()
             })
@@ -65,10 +66,12 @@ export class ProductAgent{
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if(response.responded){
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                if(response.imageUrl){
-                    for(const img of response.imageUrl){
+                if(response.image){
+                    for(const img of response.image){
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                        await this.respondService.sendAttachmentResponseToCustomer({senderId:data.senderId,attachment:{type:AttachmentType.IMAGE,payload:{url:img}}})
+                        await this.respondService.sendAttachmentResponseToCustomer({senderId:data.senderId,attachment:{type:AttachmentType.IMAGE,payload:{url:img.imageUrl}}})
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                        await this.respondService.sendTextResponseToCustomer({senderId:data.senderId,textMessage:img.message})
                     }
                 }
                 if(response.message){

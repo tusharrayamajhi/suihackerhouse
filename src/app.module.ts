@@ -102,7 +102,7 @@ import { WalrusEvent } from './event/walurs.event';
     PaymentService,
     WalrusService,
     WalrusEvent,
-    MailService
+    MailService,
 
   ],
 })
